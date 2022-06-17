@@ -1,0 +1,567 @@
+---
+title: "Bridging the gap between coding and programming"
+author: "Adam Loy"
+institute: "Carleton College"
+date: "ICSA 2022 Applied Statistics Symposium"
+format: 
+    revealjs:
+      pdf-separate-fragments: true
+      self-contained: true
+---
+
+
+# Students need to be able to *program* for and with data, not simply write data-driven *code* {background-color="#f7f2d3"}
+
+## Students need to understand *computational principles*, not simply write *scripts* for data analysis {.r-fit-text background-color="#f7f2d3"}
+
+::: aside
+Hardin, J., Horton, N. J., Nolan, D., & Lang, D. T. (2021). Computing in the Statistics Curricula: A 10-Year Retrospective. *Journal of Statistics and Data Science Education*, 29(sup1), S4–S6.
+:::
+
+
+
+## Coding {style="margin-top: 25%;" background-image="https://images.unsplash.com/photo-1624715080044-8d9e1e5aa3b2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" background-size="55%" background-position="right"}
+
+## Programming {style="margin-top: 25%;" background-image="https://images.unsplash.com/photo-1506368249639-73a05d6f6488?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" background-size="55%" background-position="right"}
+
+## We've been teaching coding skills
+
+-   Data wrangling
+
+-   Rendering graphics
+
+-   Conditional execution
+
+-   Iteration
+
+-   Writing functions
+
+-   Web scraping
+
+## Students need programming skills
+
+-   Developing logical solution to a problem
+
+-   Planning a large/complex software project
+
+-   Modularization
+
+-   Profiling
+
+- Unit testing
+
+## Each has a place in the curriculum
+ 
+::: columns
+::: {.column .fragment width="50%"}
+### Coding
+
+Focus: statistical content
+<br><br>
+
+-   Data acquisition
+
+-   Data exploration
+
+-   Inference
+
+-   Communication
+:::
+
+::: {.column .fragment width="50%"}
+### Programming
+
+Focus: problem solving *and* technical skills acquisition
+
+-   Data science
+
+-   Computational statistics
+
+- Capstones
+
+:::{.fragment style="color: steelblue;"}
+All statistics majors should be exposed to this set of ideas *within the curriculum*
+:::
+
+
+:::
+:::
+
+# Supporting programming in the curriculum
+
+## Course modules
+
+- We could design whole courses around this idea, but requires more resources and curricular redesign
+
+- More realistic to add a module/topic/assignment exploring one skill
+
+- Modules can be added to courses with less "disruption"
+
+:::{.fragment style="color: steelblue;"}
+Example: adding modularization 
+:::
+
+## Modularization
+
+::: incremental
+-   the process of identifying and creating a set of reliable helper functions to support a complex computational goal
+
+-   helps students *think* about the solution before they attempt to code it
+
+-   makes code easier to read and debug
+
+-   robust -- unit tests are easier to write
+:::
+
+# Traditional or Reactive programming?
+
+
+## "Traditional" module
+
+::: columns
+::: {.column width="15%"}
+**Who?** <br><br>
+
+**What?** <br><br>
+
+**When?**<br><br>
+
+**Where?**
+
+**How?**
+:::
+
+::: {.column width="80%"}
+
+:::{.fragment}
+Upper-division statistics students; intro data science students
+:::
+
+:::{.fragment}
+Modularize familiar code (i.e., recipes from other courses)
+:::
+
+:::{.fragment}
+In a statistics computing course or capstone, data science course
+:::
+
+:::{.fragment}
+Either in class or as homework
+:::
+
+:::{.fragment}
+Start with a familiar implementation, and provide scaffolded path to create a modularized function
+:::
+:::
+:::
+
+# Implementing the<br> one-sample bootstrap
+
+## 
+
+```{r eval=FALSE, echo=TRUE}
+B <- 1000
+stats <- numeric(B)
+
+for(i in 1:B) {
+    x <- sample(obs_sample, replace = TRUE)
+    stats[i] <- mean(x)
+}
+
+ggplot(data = NULL, aes(x = stats)) +
+    geom_histogram()
+
+data.frame(
+    observed = mean(obs_sample),
+    se = sd(stats),
+    mean = mean(stats),
+    bias = mean(stats) - mean(obs_sample)
+)
+```
+
+. . .
+
+::: {.r-fit-text}
+1. Carefully read through the code, noting what each line of code does. 
+
+2. Create a list of small/simple tasks that are implemented in the above code chunk.
+
+3. Discuss this your answer to #2 with your group. Settle on a list of small/simple tasks that are implemented and record these on the shared Google doc
+:::
+
+
+
+## 
+::: {.r-fit-text}
+4. Are any of the simple tasks already implemented in an R function? If so, which ones?
+
+5. Write an R function for each simple task identified. These functions are your set of helper functions.
+:::
+
+. . .
+
+```{r eval=FALSE, echo=TRUE}
+
+resample <- function(obs_sample, B) {
+  stats <- numeric(B)
+  for(i in 1:B) {
+    x <- sample(obs_sample, replace = TRUE)
+    stats[i] <- mean(x)
+  }
+  stats
+}
+
+plot_hist <- function(stats) {
+  ggplot(data = NULL, aes(x = stats)) +
+    geom_histogram()
+}
+
+calc_summary <- function(obs_sample, stats) {
+  data.frame(
+    observed = mean(obs_sample),
+    se = sd(stats),
+    mean = mean(stats),
+    bias = mean(stats) - mean(obs_sample)
+  )
+
+}
+
+```
+
+
+---
+
+Using your set of helper functions, create a `bootstrap()` function  that takes
+
+- `obs_sample` = observed data vector
+- `B` = # of resamples
+
+as inputs, and prints the plot and returns bootstrap summary data frame
+
+. . .
+
+\ 
+
+Sample solution:
+
+```{r eval=FALSE, echo=TRUE}
+bootstrap <- function(obs_sample, B) {
+  boot_stats <- resample(obs_sample, B)
+  print(plot_hist(boot_stats))
+  calc_summary(obs_sample, boot_stats)
+}
+```
+
+---
+
+Test your function
+
+```{r eval=FALSE, echo=TRUE}
+# Data set for testing
+data(Verizon, package = "resample")
+clec <- Verizon %>% filter(Group == "CLEC") %>% pull(Time)
+
+# How do your results compare to the below?
+Summary Statistics:
+     Observed      SE     Mean        Bias
+mean 16.50913 3.94825 16.42974 -0.07939087
+```
+
+---
+
+Here's a non-modularized version of this function. Compare and contrast the readability to your function.
+
+```{r echo=TRUE}
+bootstrap_nonmod <- function(obs_sample, B) {
+  stats <- numeric(B)
+
+  for(i in 1:B) {
+    x <- sample(obs_sample, replace = TRUE)
+    stats[i] <- mean(x)
+  }
+  
+  p <- ggplot(data = NULL, aes(x = stats)) +
+    geom_histogram()
+  print(p)
+  
+  data.frame(
+    observed = mean(obs_sample),
+    se = sd(stats),
+    mean = mean(stats),
+    bias = mean(stats) - mean(obs_sample)
+  )
+}
+```
+
+
+
+## Shiny-based approach
+
+
+::: columns
+::: {.column width="15%"}
+**Who?** <br><br>
+
+**What?** <br><br>
+
+**When?**<br><br>
+
+**Where?** <br><br>
+
+**How?**
+:::
+
+::: {.column width="80%"}
+:::{.fragment}
+Intro data science students<br><br>
+:::
+
+:::{.fragment}
+Streamline interactivity in a Shiny app<br><br>
+:::
+
+:::{.fragment}
+In a data science course <br><br>
+:::
+
+:::{.fragment}
+Either in class or as homework<br><br>
+:::
+
+:::{.fragment}
+Start with a clunky Shiny app, provide guided exploration to discover and fix issues
+:::
+:::
+:::
+
+
+<!-- # But first... a quick crash course on reactivity in Shiny -->
+
+
+<!-- ## Reactive crash course -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- #| fig-align: "center" -->
+<!-- knitr::include_graphics("https://shiny.rstudio.com/images/basic2.png") -->
+
+<!-- ``` -->
+
+<!-- ::: aside -->
+<!-- Reactive images source: https://shiny.rstudio.com/articles/understanding-reactivity.html -->
+<!-- ::: -->
+
+
+
+<!-- ## Reactive crash course -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- #| fig-align: "center" -->
+<!-- knitr::include_graphics("https://shiny.rstudio.com/images/basic2.png") -->
+
+<!-- ``` -->
+
+<!-- - If value of `a` changes, then rerun `print()` -->
+
+<!-- - Expressions only rerun if the expression is "out of date" -->
+
+
+
+
+
+<!-- ## Reactive crash course -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- #| fig-align: "center" -->
+
+<!-- knitr::include_graphics("https://shiny.rstudio.com/images/context.png") -->
+
+<!-- ``` -->
+
+<!-- - `input$a` is a reactive value -->
+
+<!-- - `print(input$a)` is an observer -->
+
+<!-- - Observers create commands to rerun on the server -->
+
+
+
+<!-- ## Reactive crash course -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- #| fig-align: "center" -->
+<!-- knitr::include_graphics("https://shiny.rstudio.com/images/context2.png") -->
+
+<!-- ``` -->
+
+<!-- - When reactive value changes, command is sent to server to rerun -->
+
+
+
+<!-- ## Reactive crash course -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- #| fig-align: "center" -->
+<!-- knitr::include_graphics("https://shiny.rstudio.com/images/context3.png") -->
+
+<!-- ``` -->
+
+<!-- - Server runs the commands, updating the observer -->
+
+
+
+
+# Building a one-sample bootstrap app 
+
+## Exploration questions
+
+1. What output changes when you change... 
+    + the number of bootstrap resamples?
+    + the number of histogram bins?
+    + the confidence level?
+
+2. Looking back through #1, are there any surprises? Does anything change/update unexpectedly? Does anything fail to update?
+
+
+## {background-image="figs/adjust_bins.gif" background-size="contain" background-position="bottom"}
+
+## {background-image="figs/adjust_level.gif" background-size="contain" background-position="bottom"}
+
+
+
+---
+::: {.r-fit-text}
+3. Read through the code in the `renderPlot()` and `renderPrint()` reactive expressions. Note the key tasks executed within each. 
+
+4. Is there any replication? That is, are any key tasks executed multiple times?
+:::
+
+
+```{r eval=FALSE, echo=TRUE}
+#| code-line-numbers: "|3,13"
+h3("Bootstrap distribution")
+renderPlot({
+  boot <- resample(obs_data, B = input$n_boot)
+  data.frame(means = boot) %>%
+    ggplot(aes(x = means)) +
+    stat_histinterval(breaks = input$nbins, .width = input$conf_level, size = 20) +
+    theme_minimal() +
+    labs(x = paste("Mean of flipper length")) 
+})
+
+h3("Bootstrap percentile interval")
+renderPrint({
+  boot <- resample(obs_data, B = input$n_boot)
+  alpha <- 1 - input$conf_level
+  quantiles <- quantile(boot, probs = c(alpha/2, 1 - alpha/2))
+  c(mean = mean(boot), quantiles)
+})
+```
+
+
+---
+
+::: {.r-fit-text}
+5. Create a list of reactive values/expressions that should be created *outside* the `render*` statements. Are any of these user inputs? 
+
+::: columns
+::: {.column width="4%"}
+::: 
+::: {.column width="40%"}
+- `conf_level` (user input)
+- `nbins` (user input)
+- `n_boot` (user input)
+::: 
+::: {.column width="40%"}
+- `boot`
+:::
+:::
+
+6. For each reactive expression you identify in step #5, which output (the histogram or the confidence interval) should observe that expression and update when it is changed?
+
+    + `n_boot` &rarr; `boot` &rarr; both
+    + `conf_level` &rarr; both (but only interval)
+    + `nbins` &rarr; histogram
+:::
+
+
+---
+
+
+7. Use your answers to steps #5 & 6 to reorganize the server-side code for this Shiny app. 
+
+
+    + Create a reactive expression, `boot()`, to store the bootstrap statistics
+
+```{r eval=FALSE, echo=TRUE}
+boot <- reactive({
+  resample(obs_data, B = input$n_boot)
+})
+```
+
+
+## {auto-animate=true}
+
+
+* Adapt the `renderPlot()` and `renderPrint()` statements to use the reactive object you just created.
+
+
+```{r eval=FALSE, echo=TRUE}
+renderPlot({
+  boot <- resample(obs_data, B = input$n_boot)
+  data.frame(means = boot) %>%
+    ggplot(aes(x = means)) +
+    stat_histinterval(breaks = input$nbins, .width = input$conf_level, size = 20) +
+    theme_minimal() +
+    labs(x = paste("Mean of flipper length"))
+})
+
+renderPrint({
+  boot <- resample(obs_data, B = input$n_boot)
+  alpha <- 1 - input$conf_level
+  quantiles <- quantile(boot, probs = c(alpha/2, 1 - alpha/2))
+  c(mean = mean(boot), quantiles)
+})
+```
+
+## {auto-animate=true}
+
+* Adapt the `renderPlot()` and `renderPrint()` statements to use the reactive object you just created.
+
+
+```{r eval=FALSE, echo=TRUE}
+#| code-line-numbers: "|1-3,6,15-16"
+boot <- reactive({
+  resample(obs_data, B = input$n_boot)
+})
+
+renderPlot({
+  data.frame(means = boot()) %>%
+    ggplot(aes(x = means)) +
+    stat_histinterval(breaks = input$nbins, .width = input$conf_level, size = 20) +
+    theme_minimal() +
+    labs(x = paste("Mean of flipper length"))
+})
+
+renderPrint({
+  alpha <- 1 - input$conf_level
+  quantiles <- quantile(boot(), probs = c(alpha/2, 1 - alpha/2))
+  c(mean = mean(boot()), quantiles)
+})
+```
+
+
+## {background-image="figs/fixed_app.gif" background-size="contain" background-position="bottom"}
+
+
+
+## Summary {background-color="#f7f2d3"}
+::: {.incremental}
+- Statistics majors need to be able to *program* for and with data, not simply write data-driven *code*
+
+- For upper-division students, this can be done in traditional curriculum
+
+- Reactive programming in Shiny is another way to hone these skills
+
+    + Can fall earlier (intro DS)
+    + Students can *see* benefit in the app/dashboard
+:::
