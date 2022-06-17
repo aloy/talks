@@ -6,7 +6,7 @@ date: "ICSA 2022 Applied Statistics Symposium"
 format: 
     revealjs:
       pdf-separate-fragments: true
-      self-contained: true
+      # self-contained: true
 ---
 
 
